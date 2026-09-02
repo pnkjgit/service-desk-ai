@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: service-desk-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: servicedesk
+      POSTGRES_PASSWORD: servicedesk_password
+      POSTGRES_DB: servicedesk
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
