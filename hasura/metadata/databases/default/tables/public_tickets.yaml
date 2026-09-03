@@ -1,0 +1,25 @@
+table:
+  name: tickets
+  schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - description
+        - priority
+        - title
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - priority
+        - status
+        - title
+        - description
+        - created_at
+        - updated_at
+        - id
+      filter: {}
+    comment: ""
