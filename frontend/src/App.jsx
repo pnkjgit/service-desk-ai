@@ -1,74 +1,45 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   useAuthenticationStatus,
-  useSignInEmailPassword,
   useNhostClient,
+  useSignInEmailPassword,
 } from '@nhost/react';
-import {
-  GET_TICKETS,
-  CREATE_TICKET,
-  UPDATE_TICKET,
-  DELETE_TICKET,
-} from './graphql/tickets';
+
+import useTickets from './hooks/useTickets';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import TicketForm from './components/TicketForm';
+import TicketList from './components/TicketList';
 
 function App() {
-  const [tickets, setTickets] = useState([]);
-  const [editingTicket, setEditingTicket] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('low');
-  const [isCreating, setIsCreating] = useState(false);
 
-  const [ticketsError, setTicketsError] = useState('');
-  const [createError, setCreateError] = useState('');
+  const [editingTicket, setEditingTicket] = useState(null);
 
   const { isAuthenticated, isLoading } = useAuthenticationStatus();
 
   const {
     signInEmailPassword,
     isLoading: isSigningIn,
-    error,
+    error: signInError,
   } = useSignInEmailPassword();
 
   const nhost = useNhostClient();
 
-useEffect(() => {
-  if (!isAuthenticated) {
-    return;
-  }
-
-  let cancelled = false;
-
-  const loadTickets = async () => {
-    try {
-      const { data, error } = await nhost.graphql.request(GET_TICKETS);
-
-      if (error) {
-        throw error;
-      }
-
-      if (!cancelled) {
-        setTickets(data.tickets);
-        setTicketsError("");
-      }
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-
-      if (!cancelled) {
-        setTicketsError("Unable to load tickets.");
-      }
-    }
-  };
-
-  loadTickets();
-
-  return () => {
-    cancelled = true;
-  };
-}, [isAuthenticated, nhost]);
+  const {
+    tickets,
+    ticketsError,
+    createError,
+    isCreating,
+    createTicket,
+    updateTicket,
+    deleteTicket,
+  } = useTickets(nhost, isAuthenticated);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -79,92 +50,47 @@ useEffect(() => {
   const handleCreateTicket = async (event) => {
     event.preventDefault();
 
-    try {
-      setIsCreating(true);
-      setCreateError('');
+    const success = await createTicket({
+      title,
+      description,
+      priority,
+    });
 
-      const { data, error } = await nhost.graphql.request(CREATE_TICKET, {
-        title,
-        description,
-        priority,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      setTickets((currentTickets) => [
-        data.insert_tickets_one,
-        ...currentTickets,
-      ]);
-
+    if (success) {
       setTitle('');
       setDescription('');
       setPriority('low');
-    } catch (error) {
-      console.error('Error creating ticket:', error);
-      setCreateError('Unable to create ticket.');
-    } finally {
-      setIsCreating(false);
     }
   };
 
   const handleUpdateTicket = async (event) => {
     event.preventDefault();
 
-    try {
-      const { data, error } = await nhost.graphql.request(UPDATE_TICKET, {
-        id: editingTicket.id,
-        title: editingTicket.title,
-        description: editingTicket.description,
-        status: editingTicket.status,
-        priority: editingTicket.priority,
-      });
+    const success = await updateTicket(editingTicket);
 
-      if (error) {
-        throw error;
-      }
-
-      setTickets((currentTickets) =>
-        currentTickets.map((ticket) =>
-          ticket.id === data.update_tickets_by_pk.id
-            ? data.update_tickets_by_pk
-            : ticket
-        )
-      );
-
+    if (success) {
       setEditingTicket(null);
-    } catch (error) {
-      console.error('Error updating ticket:', error);
     }
   };
 
   const handleDeleteTicket = async (ticketId) => {
     const confirmed = window.confirm(
-      'Are you sure you want to delete this ticket?'
+      'Are you sure you want to delete this ticket?',
     );
 
     if (!confirmed) {
       return;
     }
 
-    try {
-      const { data, error } = await nhost.graphql.request(DELETE_TICKET, {
-        id: ticketId,
-      });
+    await deleteTicket(ticketId);
+  };
 
-      if (error) {
-        throw error;
-      }
+  const handleEditTicket = (ticket) => {
+    setEditingTicket(ticket);
+  };
 
-      setTickets((currentTickets) =>
-        currentTickets.filter(
-          (ticket) => ticket.id !== data.delete_tickets_by_pk.id
-        )
-      );
-    } catch (error) {
-      console.error('Error deleting ticket:', error);
-    }
+  const handleCancelEdit = () => {
+    setEditingTicket(null);
   };
 
   if (isLoading) {
@@ -173,220 +99,153 @@ useEffect(() => {
 
   if (!isAuthenticated) {
     return (
-      <div className="App">
-        <h1>Service Desk</h1>
+      <div className="app-layout">
+        <main className="main-content">
+          <div className="page">
+            <div className="page-heading">
+              <h1>Service Desk</h1>
+              <p>Sign in to manage your support tickets.</p>
+            </div>
 
-        <form onSubmit={handleLogin}>
-          <div>
-            <label>Email</label>
-            <br />
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email"
-              required
-            />
+            <section className="section">
+              <div className="section-header">
+                <h2>Sign in</h2>
+              </div>
+
+              <form className="form" onSubmit={handleLogin}>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="email">
+                    Email
+                  </label>
+
+                  <input
+                    id="email"
+                    className="form-input"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="Email"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="password">
+                    Password
+                  </label>
+
+                  <input
+                    id="password"
+                    className="form-input"
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Password"
+                    required
+                  />
+                </div>
+
+                <button
+                  className="button button-primary"
+                  type="submit"
+                  disabled={isSigningIn}
+                >
+                  {isSigningIn ? 'Signing in...' : 'Sign in'}
+                </button>
+
+                {signInError && <p>{signInError.message}</p>}
+              </form>
+            </section>
           </div>
-
-          <br />
-
-          <div>
-            <label>Password</label>
-            <br />
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Password"
-              required
-            />
-          </div>
-
-          <br />
-
-          <button type="submit" disabled={isSigningIn}>
-            {isSigningIn ? 'Signing in...' : 'Sign in'}
-          </button>
-
-          {error && <p>{error.message}</p>}
-        </form>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="App">
-      <h1>Service Desk</h1>
-      <hr />
+    <div className="app-layout">
+      <Sidebar />
 
-      <h2>Create Ticket</h2>
+      <main className="main-content">
+        <Header />
 
-      <form onSubmit={handleCreateTicket}>
-        <div>
-          <label>Title</label>
+        <div className="page">
+          <div className="page-heading">
+            <h1>Dashboard</h1>
+            <p>Manage and track your support tickets.</p>
+          </div>
+
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-label">Total Tickets</div>
+              <div className="stat-value">{tickets.length}</div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-label">Open Tickets</div>
+              <div className="stat-value">
+                {tickets.filter((ticket) => ticket.status === 'open').length}
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-label">High Priority</div>
+              <div className="stat-value">
+                {tickets.filter((ticket) => ticket.priority === 'high').length}
+              </div>
+            </div>
+          </div>
+
+          <TicketForm
+            title={editingTicket ? editingTicket.title : title}
+            description={
+              editingTicket ? editingTicket.description || '' : description
+            }
+            priority={editingTicket ? editingTicket.priority : priority}
+            isEditing={Boolean(editingTicket)}
+            isCreating={isCreating}
+            onTitleChange={(value) =>
+              editingTicket
+                ? setEditingTicket({
+                    ...editingTicket,
+                    title: value,
+                  })
+                : setTitle(value)
+            }
+            onDescriptionChange={(value) =>
+              editingTicket
+                ? setEditingTicket({
+                    ...editingTicket,
+                    description: value,
+                  })
+                : setDescription(value)
+            }
+            onPriorityChange={(value) =>
+              editingTicket
+                ? setEditingTicket({
+                    ...editingTicket,
+                    priority: value,
+                  })
+                : setPriority(value)
+            }
+            onSubmit={
+              editingTicket ? handleUpdateTicket : handleCreateTicket
+            }
+            onCancel={handleCancelEdit}
+          />
+
           <br />
-          <input
-            type="text"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="Ticket title"
-            required
+
+          {createError && <p>{createError}</p>}
+          {ticketsError && <p>{ticketsError}</p>}
+
+          <TicketList
+            tickets={tickets}
+            onEdit={handleEditTicket}
+            onDelete={handleDeleteTicket}
           />
         </div>
-
-        <br />
-
-        <div>
-          <label>Description</label>
-          <br />
-          <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Describe the problem"
-            rows="4"
-          />
-        </div>
-
-        <br />
-
-        <div>
-          <label>Priority</label>
-          <br />
-          <select
-            value={priority}
-            onChange={(event) => setPriority(event.target.value)}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-
-        <br />
-
-        <button type="submit" disabled={isCreating}>
-          {isCreating ? 'Creating...' : 'Create Ticket'}
-        </button>
-
-        {createError && <p>{createError}</p>}
-      </form>
-
-      <hr />
-
-      {editingTicket && (
-        <>
-          <h2>Edit Ticket</h2>
-
-          <form onSubmit={handleUpdateTicket}>
-            <div>
-              <label>Title</label>
-              <br />
-              <input
-                type="text"
-                value={editingTicket.title}
-                onChange={(event) =>
-                  setEditingTicket({
-                    ...editingTicket,
-                    title: event.target.value,
-                  })
-                }
-                required
-              />
-            </div>
-
-            <br />
-
-            <div>
-              <label>Description</label>
-              <br />
-              <textarea
-                value={editingTicket.description || ''}
-                onChange={(event) =>
-                  setEditingTicket({
-                    ...editingTicket,
-                    description: event.target.value,
-                  })
-                }
-                rows="4"
-              />
-            </div>
-
-            <br />
-
-            <div>
-              <label>Status</label>
-              <br />
-              <select
-                value={editingTicket.status}
-                onChange={(event) =>
-                  setEditingTicket({
-                    ...editingTicket,
-                    status: event.target.value,
-                  })
-                }
-              >
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-
-            <br />
-
-            <div>
-              <label>Priority</label>
-              <br />
-              <select
-                value={editingTicket.priority}
-                onChange={(event) =>
-                  setEditingTicket({
-                    ...editingTicket,
-                    priority: event.target.value,
-                  })
-                }
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-
-            <br />
-
-            <button type="submit">Save Changes</button>
-
-            <button type="button" onClick={() => setEditingTicket(null)}>
-              Cancel
-            </button>
-          </form>
-
-          <hr />
-        </>
-      )}
-
-      <h2>My Tickets</h2>
-
-      {ticketsError && <p>{ticketsError}</p>}
-
-      {!ticketsError && tickets.length === 0 && <p>No tickets found.</p>}
-
-      {tickets.map((ticket) => (
-        <div key={ticket.id}>
-          <h3>{ticket.title}</h3>
-
-          <p>{ticket.description}</p>
-
-          <p>
-            Status: {ticket.status} | Priority: {ticket.priority}
-          </p>
-
-          <button onClick={() => setEditingTicket(ticket)}>Edit</button>
-
-          <button onClick={() => handleDeleteTicket(ticket.id)}>Delete</button>
-
-          <hr />
-        </div>
-      ))}
+      </main>
     </div>
   );
 }
