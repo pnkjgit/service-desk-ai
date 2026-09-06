@@ -45,8 +45,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
 
   --shadow-md:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 
   --radius: 12px;
 }
@@ -300,6 +299,55 @@ button:disabled {
 }
 
 /* ================================
+   Ticket Details
+================================ */
+
+.ticket-description {
+  max-width: 420px;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-id {
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+}
+
+.ticket-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ================================
+   Empty State
+================================ */
+
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-state-title {
+  margin-bottom: 6px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ================================
    Table
 ================================ */
 
@@ -495,6 +543,28 @@ button:disabled {
 
 .form .button-primary {
   min-width: 120px;
+}
+
+/* ================================
+   Ticket Filters
+================================ */
+
+.ticket-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 180px 180px;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ticket-filters .form-input,
+.ticket-filters .form-select {
+  background: var(--surface);
+}
+
+@media (max-width: 700px) {
+  .ticket-filters {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ================================

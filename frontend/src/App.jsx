@@ -24,6 +24,10 @@ function App() {
 
   const { isAuthenticated, isLoading } = useAuthenticationStatus();
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+
   const {
     signInEmailPassword,
     isLoading: isSigningIn,
@@ -94,6 +98,22 @@ function App() {
   const handleCancelEdit = () => {
     setEditingTicket(null);
   };
+
+  const filteredTickets = tickets.filter((ticket) => {
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      ticket.title.toLowerCase().includes(search) ||
+      (ticket.description || '').toLowerCase().includes(search);
+
+    const matchesStatus =
+      statusFilter === 'all' || ticket.status === statusFilter;
+
+    const matchesPriority =
+      priorityFilter === 'all' || ticket.priority === priorityFilter;
+
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -223,6 +243,37 @@ function App() {
               <p>Create, update and manage your support tickets.</p>
             </div>
 
+            <div className="ticket-filters">
+              <input
+                className="form-input"
+                type="search"
+                placeholder="Search tickets..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+
+              <select
+                className="form-select"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+              >
+                <option value="all">All statuses</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+              </select>
+
+              <select
+                className="form-select"
+                value={priorityFilter}
+                onChange={(event) => setPriorityFilter(event.target.value)}
+              >
+                <option value="all">All priorities</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
             <TicketForm
               title={editingTicket ? editingTicket.title : title}
               description={
@@ -265,7 +316,7 @@ function App() {
             {ticketsError && <p>{ticketsError}</p>}
 
             <TicketList
-              tickets={tickets}
+              tickets={filteredTickets}
               onEdit={handleEditTicket}
               onDelete={handleDeleteTicket}
             />

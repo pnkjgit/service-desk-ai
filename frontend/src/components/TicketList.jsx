@@ -6,8 +6,9 @@ function TicketList({ tickets, onEdit, onDelete }) {
       </div>
 
       {tickets.length === 0 ? (
-        <div className="form">
-          <p>No tickets found.</p>
+        <div className="empty-state">
+          <div className="empty-state-title">No tickets found</div>
+          <p>Try changing your search or filters.</p>
         </div>
       ) : (
         <table className="ticket-table">
@@ -26,7 +27,14 @@ function TicketList({ tickets, onEdit, onDelete }) {
               <tr key={ticket.id}>
                 <td>
                   <div className="ticket-title">{ticket.title}</div>
-                  <div>{ticket.description}</div>
+
+                  {ticket.description && (
+                    <div className="ticket-description">
+                      {ticket.description}
+                    </div>
+                  )}
+
+                  <div className="ticket-id">#{ticket.id.slice(0, 8)}</div>
                 </td>
 
                 <td>
@@ -44,18 +52,23 @@ function TicketList({ tickets, onEdit, onDelete }) {
                 <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
 
                 <td>
-                  <button
-                    className="button button-secondary"
-                    onClick={() => onEdit(ticket)}
-                  >
-                    Edit
-                  </button>{' '}
-                  <button
-                    className="button button-danger"
-                    onClick={() => onDelete(ticket.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="ticket-actions">
+                    <button
+                      className="button button-secondary"
+                      type="button"
+                      onClick={() => onEdit(ticket)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="button button-danger"
+                      type="button"
+                      onClick={() => onDelete(ticket.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
