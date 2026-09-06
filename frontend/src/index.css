@@ -1,6 +1,11 @@
 :root {
   font-family:
-    Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 
   color: #1f2937;
   background: #f5f7fa;
@@ -11,15 +16,18 @@
 
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
+  --primary-light: #eff6ff;
 
   --background: #f5f7fa;
   --surface: #ffffff;
+  --surface-hover: #f9fafb;
 
   --text-primary: #111827;
   --text-secondary: #6b7280;
   --text-muted: #9ca3af;
 
   --border: #e5e7eb;
+  --border-light: #f3f4f6;
 
   --sidebar: #111827;
   --sidebar-text: #d1d5db;
@@ -33,10 +41,23 @@
 
   --danger: #b91c1c;
   --danger-bg: #fee2e2;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -2px rgba(0, 0, 0, 0.05);
+
+  --radius: 12px;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--background);
 }
 
 body {
@@ -57,18 +78,27 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 #root {
   min-height: 100vh;
 }
 
-/* App layout */
+/* ================================
+   App Layout
+================================ */
 
 .app-layout {
   display: flex;
   min-height: 100vh;
 }
 
-/* Sidebar */
+/* ================================
+   Sidebar
+================================ */
 
 .sidebar {
   width: 240px;
@@ -79,10 +109,11 @@ button {
 }
 
 .sidebar-logo {
-  padding: 0 12px 28px;
+  padding: 0 12px 32px;
   color: #ffffff;
   font-size: 20px;
   font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .sidebar-nav {
@@ -99,6 +130,11 @@ button {
   background: transparent;
   color: var(--sidebar-text);
   text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .sidebar-link:hover {
@@ -111,14 +147,18 @@ button {
   color: #ffffff;
 }
 
-/* Main */
+/* ================================
+   Main
+================================ */
 
 .main-content {
   flex: 1;
   min-width: 0;
 }
 
-/* Header */
+/* ================================
+   Header
+================================ */
 
 .header {
   height: 72px;
@@ -128,6 +168,10 @@ button {
   padding: 0 32px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+}
+
+.header-user .button {
+  margin-left: 4px;
 }
 
 .header-title {
@@ -141,6 +185,8 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 .user-avatar {
@@ -149,34 +195,44 @@ button {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #dbeafe;
+  background: var(--primary-light);
   color: var(--primary);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
 }
 
-/* Page */
+/* ================================
+   Page
+================================ */
 
 .page {
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 32px;
 }
 
 .page-heading {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .page-heading h1 {
   margin: 0 0 6px;
   color: var(--text-primary);
   font-size: 28px;
+  line-height: 1.2;
   font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .page-heading p {
+  margin: 0;
   color: var(--text-secondary);
+  font-size: 14px;
 }
 
-/* Cards */
+/* ================================
+   Statistics
+================================ */
 
 .stats-grid {
   display: grid;
@@ -186,30 +242,45 @@ button {
 }
 
 .stat-card {
-  padding: 20px;
+  padding: 22px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .stat-label {
   margin-bottom: 8px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .stat-value {
   color: var(--text-primary);
   font-size: 30px;
+  line-height: 1;
   font-weight: 700;
 }
 
-/* Ticket section */
+/* ================================
+   Sections
+================================ */
 
 .section {
+  margin-bottom: 24px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -228,7 +299,9 @@ button {
   font-weight: 600;
 }
 
-/* Table */
+/* ================================
+   Table
+================================ */
 
 .ticket-table {
   width: 100%;
@@ -239,25 +312,38 @@ button {
   padding: 13px 24px;
   background: #f9fafb;
   color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-align: left;
   text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .ticket-table td {
   padding: 18px 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-light);
   color: var(--text-secondary);
   font-size: 14px;
+  vertical-align: middle;
+}
+
+.ticket-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.ticket-table tbody tr:hover {
+  background: var(--surface-hover);
 }
 
 .ticket-title {
+  margin-bottom: 3px;
   color: var(--text-primary);
   font-weight: 600;
 }
 
-/* Badges */
+/* ================================
+   Badges
+================================ */
 
 .badge {
   display: inline-flex;
@@ -266,6 +352,7 @@ button {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .badge-open {
@@ -293,14 +380,24 @@ button {
   color: var(--danger);
 }
 
-/* Buttons */
+/* ================================
+   Buttons
+================================ */
 
 .button {
   padding: 9px 14px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 7px;
   font-size: 14px;
   font-weight: 600;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .button-primary {
@@ -308,7 +405,7 @@ button {
   color: #ffffff;
 }
 
-.button-primary:hover {
+.button-primary:hover:not(:disabled) {
   background: var(--primary-dark);
 }
 
@@ -317,12 +414,22 @@ button {
   color: #374151;
 }
 
+.button-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
 .button-danger {
   background: var(--danger-bg);
   color: var(--danger);
 }
 
-/* Forms */
+.button-danger:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+/* ================================
+   Forms
+================================ */
 
 .form {
   padding: 24px;
@@ -350,6 +457,20 @@ button {
   background: #ffffff;
   color: var(--text-primary);
   outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.form-input:hover,
+.form-textarea:hover,
+.form-select:hover {
+  border-color: #d1d5db;
 }
 
 .form-input:focus,
@@ -364,7 +485,21 @@ button {
   resize: vertical;
 }
 
-/* Responsive */
+/* ================================
+   Login
+================================ */
+
+.main-content > .page {
+  min-height: calc(100vh - 72px);
+}
+
+.form .button-primary {
+  min-width: 120px;
+}
+
+/* ================================
+   Responsive
+================================ */
 
 @media (max-width: 900px) {
   .sidebar {
@@ -386,11 +521,20 @@ button {
   }
 
   .header {
+    height: 64px;
     padding: 0 20px;
+  }
+
+  .header-title {
+    font-size: 18px;
   }
 
   .page {
     padding: 20px;
+  }
+
+  .page-heading h1 {
+    font-size: 24px;
   }
 
   .ticket-table {
@@ -399,5 +543,13 @@ button {
 
   .section {
     overflow-x: auto;
+  }
+
+  .section-header {
+    padding: 18px 20px;
+  }
+
+  .form {
+    padding: 20px;
   }
 }

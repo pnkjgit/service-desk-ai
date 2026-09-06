@@ -41,9 +41,7 @@ function TicketList({ tickets, onEdit, onDelete }) {
                   </span>
                 </td>
 
-                <td>
-                  {new Date(ticket.created_at).toLocaleDateString()}
-                </td>
+                <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
 
                 <td>
                   <button
@@ -51,8 +49,7 @@ function TicketList({ tickets, onEdit, onDelete }) {
                     onClick={() => onEdit(ticket)}
                   >
                     Edit
-                  </button>{" "}
-
+                  </button>{' '}
                   <button
                     className="button button-danger"
                     onClick={() => onDelete(ticket.id)}

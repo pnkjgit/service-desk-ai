@@ -13,7 +13,7 @@ function TicketForm({
   return (
     <section className="section">
       <div className="section-header">
-        <h2>{isEditing ? "Edit Ticket" : "Create Ticket"}</h2>
+        <h2>{isEditing ? 'Edit Ticket' : 'Create Ticket'}</h2>
       </div>
 
       <form className="form" onSubmit={onSubmit}>
@@ -70,10 +70,10 @@ function TicketForm({
           disabled={isCreating}
         >
           {isCreating
-            ? "Saving..."
+            ? 'Saving...'
             : isEditing
-              ? "Save Changes"
-              : "Create Ticket"}
+              ? 'Save Changes'
+              : 'Create Ticket'}
         </button>
 
         {isEditing && (

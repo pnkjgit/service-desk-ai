@@ -96,8 +96,8 @@ function useTickets(nhost, isAuthenticated) {
         currentTickets.map((currentTicket) =>
           currentTicket.id === data.update_tickets_by_pk.id
             ? data.update_tickets_by_pk
-            : currentTicket,
-        ),
+            : currentTicket
+        )
       );
 
       return true;
@@ -119,9 +119,8 @@ function useTickets(nhost, isAuthenticated) {
 
       setTickets((currentTickets) =>
         currentTickets.filter(
-          (currentTicket) =>
-            currentTicket.id !== data.delete_tickets_by_pk.id,
-        ),
+          (currentTicket) => currentTicket.id !== data.delete_tickets_by_pk.id
+        )
       );
 
       return true;
